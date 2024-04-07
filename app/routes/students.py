@@ -4,20 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException,responses,Query
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
-from app.db.models import StudentsIn,Detail,StudentOut
+from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict
 from app.db.models import studententity
+from fastapi import Path
 router = APIRouter()
 
-async def cursor_to_dict(cursor):
-    result = []
-    async for doc in cursor:
-        data = {
-            'name': doc.get('name', ''),
-            'age': doc.get('age', 0),
-            'address': doc.get('address', {})
-        }
-        result.append(data)
-    return result
+
 
 @router.post("/students",response_model=Detail,status_code=201,
              responses={201: {"description": "A JSON response sending back the ID of the newly created student record."}})
@@ -38,12 +30,6 @@ async def create_student(student: StudentsIn,client=Depends(get_client)):
         raise HTTPException(status_code=500,detail=f"Unable to create student: {e}")
     
 
-def student_data(data)->dict:
-    return {
-        'name':data['name'],
-        'age':data['age'],
-        'address':data['address']
-    }
 
 
 
@@ -97,7 +83,7 @@ async def list_students(
 
 
 
-from fastapi import Path
+
 
 @router.get("/students/{id}",
             responses={200: {"description": "sample response"},
@@ -149,7 +135,11 @@ async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient
 
         return {}
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to update student: {e}")
+        sc=500
+        if isinstance(e,HTTPException):
+            sc=e.status_code
+            detail=e.detail
+        raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
 
 
 
@@ -174,7 +164,11 @@ async def delete_student(id:str,client=Depends(get_client)):
         
         return {"message":"Student deleted successfully"}
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to delete student: {e}")
+        sc=500
+        if isinstance(e,HTTPException):
+            sc=e.status_code
+            detail=e.detail
+        raise HTTPException(status_code=sc,detail=f"Unable to delete student: {detail}")
 
     
     

@@ -48,20 +48,21 @@ class StudentUpdate(BaseModel):
         exclude_unset = True
 
 
-def studententity_to_dict(data)->dict:
+
+def student_data(data)->dict:
     return {
         'name':data['name'],
         'age':data['age'],
         'address':data['address']
     }
 
-async def studententity(data):
-    data=[]
-    for student in data:
-        data_dict=studententity_to_dict(student)
-        print(student)
-        data.append(data_dict)
-    return data
-    # for student in data:
-        
-
+async def cursor_to_dict(cursor):
+    result = []
+    async for doc in cursor:
+        data = {
+            'name': doc.get('name', ''),
+            'age': doc.get('age', 0),
+            'address': doc.get('address', {})
+        }
+        result.append(data)
+    return result
