@@ -38,10 +38,14 @@ class StudentOut(BaseModel):
 class Detail(BaseModel):
     id:str
 
+class Address_optional(BaseModel):
+    city: Optional[str]=None
+    country: Optional[str]=None
+
 class StudentUpdate(BaseModel):
     name: Optional[str]=None
     age: Optional[int]=None
-    address: Optional[Address]=None
+    address: Optional[Address_optional]=None
 
     class config:
         orm_mode = True
