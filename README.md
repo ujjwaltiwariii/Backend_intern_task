@@ -1,4 +1,4 @@
-# My API
+# Backend Inter task API
 
 This is a RESTful API built with FastAPI.
 
@@ -12,10 +12,11 @@ The API is structured as follows:
 
 ## Setup
 
-1. Clone the repository: `git clone https://github.com/yourusername/yourrepository.git`
-2. Navigate to the project directory: `cd yourrepository`
+1. Clone the repository: `git clone https://github.com/ujjwaltiwariii/Backend_intern_task.git`
+2. Navigate to the project directory: `cd Backend_intern_task`
 3. Install the dependencies: `pip install -r requirements.txt`
-4. Run the server: `uvicorn main:app --reload`
+4. Create `.env` file and add `uri= your mongo db uri`
+5. Run the server: `uvicorn main:app --reload`
 
 ## Usage
 
