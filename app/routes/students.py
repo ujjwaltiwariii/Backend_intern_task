@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException,responses,Query
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
-from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict
+from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict,flatten_address
 from app.db.models import StudentUpdate 
 from fastapi import Path
 router = APIRouter()
@@ -27,7 +27,13 @@ async def create_student(student: StudentsIn,client=Depends(get_client)):
 
         return {'id':str(student.inserted_id)}
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"Unable to create student: {e}")
+        sc=500
+        if isinstance(e,HTTPException):
+            sc=e.status_code
+            detail=e.detail
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+        else:
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {e}")
     
 
 
@@ -75,7 +81,13 @@ async def list_students(
 
     
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to fetch student: {e}")
+        sc=500
+        if isinstance(e,HTTPException):
+            sc=e.status_code
+            detail=e.detail
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+        else:
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {e}")
     
 
 
@@ -113,8 +125,9 @@ async def fetch_student(id:str=Path(description="The ID of the student previousl
         if isinstance(e,HTTPException):
             sc=e.status_code
             detail=e.detail
-
-        raise HTTPException(status_code=sc,detail=f"Unable to fetch Student: {detail}")
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+        else:
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {e}")
 
 
 
@@ -127,7 +140,8 @@ async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient
     """
     try:
         collection = client.get_database('LMS').get_collection('Students')
-        update_result = await collection.update_one({'_id': ObjectId(id)}, {'$set': student.model_dump(exclude_unset=True)})
+        updated_student_data = flatten_address(student)
+        update_result = await collection.update_one({'_id': ObjectId(id)}, {'$set': updated_student_data})
 
         if update_result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Student not found")
@@ -138,7 +152,9 @@ async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient
         if isinstance(e,HTTPException):
             sc=e.status_code
             detail=e.detail
-        raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+        else:
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {e}")
 
 
 
@@ -167,7 +183,7 @@ async def delete_student(id:str,client=Depends(get_client)):
         if isinstance(e,HTTPException):
             sc=e.status_code
             detail=e.detail
-        raise HTTPException(status_code=sc,detail=f"Unable to delete student: {detail}")
-
-    
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {detail}")
+        else:
+            raise HTTPException(status_code=sc,detail=f"Unable to update student: {e}")
     

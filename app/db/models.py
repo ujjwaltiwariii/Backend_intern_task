@@ -38,12 +38,14 @@ class StudentOut(BaseModel):
 class Detail(BaseModel):
     id:str
 
-
+class AddressOptional(BaseModel):
+    city: Optional[str]=None
+    country: Optional[str]=None
 
 class StudentUpdate(BaseModel):
     name: Optional[str]=None
     age: Optional[int]=None
-    address: Optional[Address]=None
+    address: Optional[AddressOptional]=None
 
     class config:
         orm_mode = True
@@ -57,6 +59,13 @@ def student_data(data)->dict:
         'age':data['age'],
         'address':data['address']
     }
+def flatten_address(student: StudentUpdate) -> dict:
+    data = student.dict(exclude_unset=True)
+    if 'address' in data:
+        for key, value in data['address'].items():
+            data[f'address.{key}'] = value
+        del data['address']
+    return data
 
 async def cursor_to_dict(cursor):
     result = []
