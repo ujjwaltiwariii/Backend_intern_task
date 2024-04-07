@@ -5,7 +5,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict
-from app.db.models import studententity
 from app.db.models import StudentUpdate 
 from fastapi import Path
 router = APIRouter()
