@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict
 from app.db.models import studententity
+from app.db.models import StudentUpdate 
 from fastapi import Path
 router = APIRouter()
 
@@ -119,7 +120,6 @@ async def fetch_student(id:str=Path(description="The ID of the student previousl
 
 
 
-from app.db.models import StudentUpdate 
 
 @router.patch("/students/{id}",responses={204: {"description": "No Content","content": {"application/json": {"example": {}}}}},status_code=204)
 async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient=Depends(get_client)):
