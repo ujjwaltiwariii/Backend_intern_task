@@ -30,15 +30,15 @@ async def create_student(student: StudentsIn,client=Depends(get_client)):
     try:
         db=client.get_database('LMS')
         collection=db.get_collection('Students')
-        user=await collection.insert_one(jsonable_encoder(student))
-        print(type(user.inserted_id))
+        student=await collection.insert_one(jsonable_encoder(student))
+        print(type(student.inserted_id))
 
-        return {'id':str(user.inserted_id)}
+        return {'id':str(student.inserted_id)}
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"Unable to create user: {e}")
+        raise HTTPException(status_code=500,detail=f"Unable to create student: {e}")
     
 
-def user_data(data)->dict:
+def student_data(data)->dict:
     return {
         'name':data['name'],
         'age':data['age'],
@@ -63,53 +63,33 @@ async def list_students(
         if country and age:
             db = client.get_database('LMS')
             collection = db.get_collection('Students')
-            user = collection.find({'address.country': country, 'age': {'$gte': age}})
-            users = []
-            async for i in user:
-                data = {
-                    'name': i['name'],
-                    'age': i['age']
-                    
-                }
-                users.append(data)
-            return {'data': users}
+            student = collection.find({'address.country': country, 'age': {'$gte': age}})
+            students = await cursor_to_dict(student)
+            return {'data': students}
         if country:
             db=client.get_database('LMS')
             collection=db.get_collection('Students')
-            user=collection.find({'address.country':country})
-            users=[]
-            async for i in user:
-                data={
-                    'name':i['name'],
-                    'age':i['age'],
-                }
-                
-                users.append(data)
-            return {'data':users}
+            student=collection.find({'address.country':country})
+            students=await cursor_to_dict(student)
+            
+            return {'data':students}
         if age:
             db=client.get_database('LMS')
             collection=db.get_collection('Students')
-            user=collection.find({'age':{'$gte':age}})
-            users=[]
-            async for i in user:
-                data={
-                    'name':i['name'],
-                    'age':i['age'],
-                }
-                
-                users.append(data)
-            return {'data':users}
+            student=collection.find({'age':{'$gte':age}})
+            students=await cursor_to_dict(student)
+            return {'data':students}
         
         db=client.get_database('LMS')
         collection=db.get_collection('Students')
-        user=collection.find()
-        users=await cursor_to_dict(user)  
+        student=collection.find()
+        students=await cursor_to_dict(student)  
         
-        return {'data':users}
+        return {'data':students}
 
     
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to fetch user: {e}")
+        raise HTTPException(status_code=400,detail=f"Unable to fetch student: {e}")
     
 
 
@@ -133,10 +113,10 @@ async def fetch_student(id:str=Path(description="The ID of the student previousl
     try:
         db=client.get_database('LMS')
         collection=db.get_collection('Students')
-        user = await collection.find_one({'_id': ObjectId(id)})
+        student = await collection.find_one({'_id': ObjectId(id)})
     
-        if user:
-            return user_data(user)
+        if student:
+            return student_data(student)
         
         else:
             raise HTTPException(status_code=404,detail="Student not found")
@@ -169,7 +149,7 @@ async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient
 
         return {}
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to update user: {e}")
+        raise HTTPException(status_code=400,detail=f"Unable to update student: {e}")
 
 
 
@@ -186,15 +166,15 @@ async def delete_student(id:str,client=Depends(get_client)):
     try:
         db=client.get_database('LMS')
         collection=db.get_collection('Students')
-        user=collection.delete_one({'_id':ObjectId(id)})
-        # print(user.)
-        if not user:
+        student=collection.delete_one({'_id':ObjectId(id)})
+        # print(student.)
+        if not student:
             raise HTTPException(status_code=404,detail="Student not found")
         
         
         return {"message":"Student deleted successfully"}
     except Exception as e:
-        raise HTTPException(status_code=400,detail=f"Unable to delete user: {e}")
+        raise HTTPException(status_code=400,detail=f"Unable to delete student: {e}")
 
     
     
