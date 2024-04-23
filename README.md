@@ -39,3 +39,15 @@ Each student object has the following structure:
     "country": "string"
   }
 }
+```
+
+```json
+studentIN{
+  "name": "string",
+  "age": 0,
+  "address": {
+    "city": "string",
+    "country": "string"
+  }
+
+}

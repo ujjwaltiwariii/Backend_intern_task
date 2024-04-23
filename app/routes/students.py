@@ -6,14 +6,14 @@ from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 from app.db.models import StudentsIn,Detail,StudentOut,student_data,cursor_to_dict,flatten_address
 from app.db.models import StudentUpdate 
-from fastapi import Path
+from fastapi import Path,Header
 router = APIRouter()
 
 
 
 @router.post("/students",response_model=Detail,status_code=201,
              responses={201: {"description": "A JSON response sending back the ID of the newly created student record."}})
-async def create_student(student: StudentsIn,client=Depends(get_client)):
+async def create_student(student: StudentsIn,client=Depends(get_client),user_id:str=Header()):
     """
     API to create a student in the system. All fields are mandatory and required while creating the student in the system.
 
@@ -23,8 +23,6 @@ async def create_student(student: StudentsIn,client=Depends(get_client)):
         db=client.get_database('LMS')
         collection=db.get_collection('Students')
         student=await collection.insert_one(jsonable_encoder(student))
-        print(type(student.inserted_id))
-
         return {'id':str(student.inserted_id)}
     except Exception as e:
         sc=500
@@ -47,7 +45,8 @@ async def create_student(student: StudentsIn,client=Depends(get_client)):
 async def list_students(
     country:str=Query(default=None,description="To apply filter of country. If not given or empty, this filter should be applied."),
     age:int=Query(default=None,description="Only records which have age greater than equal to the provided age should be present in the result. If not given or empty, this filter should be applied."),
-    client=Depends(get_client)):
+    client=Depends(get_client),
+    user_id:str=Header()):
     """
     An API to find a list of students. You can apply filters on this API by passing the query parameters as listed below.
     """
@@ -104,7 +103,8 @@ async def list_students(
                        
                        },
             response_model=StudentsIn)
-async def fetch_student(id:str=Path(description="The ID of the student previously created."),client:AsyncIOMotorClient=Depends(get_client)):
+async def fetch_student(id:str=Path(description="The ID of the student previously created."),client:AsyncIOMotorClient=Depends(get_client),
+                        user_id:str=Header()):
     """
     An API to get a student. You can get a student by passing the student id in the request URL.
     """
@@ -134,7 +134,8 @@ async def fetch_student(id:str=Path(description="The ID of the student previousl
 
 
 @router.patch("/students/{id}",responses={204: {"description": "No Content","content": {"application/json": {"example": {}}}}},status_code=204)
-async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient=Depends(get_client)):
+async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient=Depends(get_client)
+                         ,user_id:str=Header()):
     """
     API to update the student's properties based on information provided. Not mandatory that all information would be sent in PATCH, only what fields are sent should be updated in the Database.
     """
@@ -164,7 +165,8 @@ async def update_student(id:str,student: StudentUpdate,client:AsyncIOMotorClient
 
 
 @router.delete("/students/{id}",responses={200: {"description": "sample response","content": {"application/json": {"example": {}}}}},status_code=200,)
-async def delete_student(id:str,client=Depends(get_client)):
+async def delete_student(id:str,client=Depends(get_client)
+                         ,user_id:str=Header()):
     """
     An API to delete a student. You can delete a student by passing the student id in the request URL.
     """
